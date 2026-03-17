@@ -1,40 +1,72 @@
-<style>
-    .relatorio-card { 
-        border: 2px solid #2c3e50; 
-        margin-bottom: 20px; 
-        padding: 15px; 
-        background: white;
-    }
-    .status-ausente { color: #c0392b; font-weight: bold; }
-    .status-presente { color: #27ae60; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid #ddd; padding: 8px; }
-</style>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico de Relatórios</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-top: 5px solid #2c3e50; }
+        .header-rel { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 14px; }
+        th { background: #f8f9fa; }
+        .btn-excluir { background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .voltar { display: block; text-align: center; margin-bottom: 20px; text-decoration: none; color: #2c3e50; font-weight: bold; }
+    </style>
+</head>
+<body>
 
-<div id="container-relatorios"></div>
+    <a href="index.html" class="voltar">← Voltar ao Início</a>
+    <h2 style="text-align:center">HISTÓRICO DE TIRAGENS</h2>
 
-<script>
-    const relatorios = JSON.parse(localStorage.getItem('relatorios') || "[]");
-    const container = document.getElementById('container-relatorios');
+    <div id="lista-historico"></div>
 
-    relatorios.forEach(rel => {
-        let htmlAusentes = rel.ausentes.map(a => 
-            `<tr><td>${a.nome}</td><td class="status-ausente">AUSENTE</td><td>${a.motivo}</td></tr>`
-        ).join('');
+    <script>
+        function carregarHistorico() {
+            const lista = document.getElementById('lista-historico');
+            const dados = JSON.parse(localStorage.getItem('historico_geral') || "[]");
 
-        container.innerHTML += `
-            <div class="relatorio-card">
-                <h3>RELATÓRIO DE FALTAS - ${rel.data} (${rel.turno})</h3>
-                <table>
-                    <thead>
-                        <tr><th>Militar</th><th>Status</th><th>Justificativa</th></tr>
-                    </thead>
-                    <tbody>
-                        ${htmlAusentes}
-                        <tr><td colspan="3"><strong>Presentes:</strong> ${rel.presentes}</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        `;
-    });
-</script>
+            if (dados.length === 0) {
+                lista.innerHTML = "<p style='text-align:center'>Nenhum relatório salvo.</p>";
+                return;
+            }
+
+            lista.innerHTML = dados.map((rel, index) => `
+                <div class="card">
+                    <div class="header-rel">
+                        <div>
+                            <strong>${rel.data} - ${rel.turno}</strong> (às ${rel.hora})
+                        </div>
+                        <button class="btn-excluir" onclick="remover(${index})">Excluir</button>
+                    </div>
+                    <div>
+                        <small>Presentes: ${rel.estatisticas.presentes} | Faltas: ${rel.estatisticas.ausentes} (Just: ${rel.estatisticas.justificados})</small>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr><th>Militar Ausente</th><th>Motivo / Justificativa</th></tr>
+                        </thead>
+                        <tbody>
+                            ${rel.detalhes.map(m => `<tr><td>${m.nome}</td><td>${m.motivo}</td></tr>`).join('')}
+                            ${rel.detalhes.length === 0 ? '<tr><td colspan="2">Nenhuma falta registrada.</td></tr>' : ''}
+                        </tbody>
+                    </table>
+                </div>
+            `).join('');
+        }
+
+        function remover(index) {
+            if (confirm("Excluir este relatório permanentemente?")) {
+                const dados = JSON.parse(localStorage.getItem('historico_geral') || "[]");
+                dados.splice(index, 1);
+                localStorage.setItem('historico_geral', JSON.stringify(dados));
+                carregarHistorico();
+            }
+        }
+
+        carregarHistorico();
+    </script>
+</body>
+</html>
+
