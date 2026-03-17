@@ -3,19 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Selecionar Turno</title>
+    <title>Selecionar Formatura</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .btn-turno { width: 80%; padding: 25px; margin: 10px; border-radius: 15px; border: none; font-size: 20px; font-weight: bold; color: white; cursor: pointer; text-decoration: none; text-align: center; }
+        h2 { color: #2c3e50; margin-bottom: 20px; }
+        .btn-turno { width: 80%; max-width: 350px; padding: 30px; margin: 10px; border-radius: 15px; border: none; font-size: 20px; font-weight: bold; color: white; cursor: pointer; text-decoration: none; text-align: center; transition: 0.3s; }
         .manha { background: #3498db; }
         .tarde { background: #e67e22; }
+        .btn-turno:hover { filter: brightness(1.1); transform: scale(1.02); }
+        .btn-voltar { margin-top: 30px; color: #7f8c8d; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h2>Selecione a Formatura</h2>
- <a href="manha.html" class="btn-turno manha">☀️ MANHÃ</a>
- <a href="tarde.html" class="btn-turno tarde">🌅 TARDE</a>
-    <br>
-    <a href="index.html" style="color: #7f8c8d; text-decoration: none;">← Voltar ao Início</a>
+    <h2>FORMATURAS DO DIA</h2>
+    <a href="manha.html" class="btn-turno manha">☀️ MANHÃ</a>
+    <a href="tarde.html" class="btn-turno tarde">🌅 TARDE</a>
+    <a href="index.html" class="btn-voltar">← VOLTAR AO INÍCIO</a>
 </body>
 </html>
