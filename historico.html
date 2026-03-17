@@ -3,64 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Histórico de Relatórios</title>
+    <title>Histórico Completo de Formaturas</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-top: 5px solid #2c3e50; }
-        .header-rel { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 14px; }
-        th { background: #f8f9fa; }
-        .btn-excluir { background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-        .voltar { display: block; text-align: center; margin-bottom: 20px; text-decoration: none; color: #2c3e50; font-weight: bold; }
+        .relatorio-folha { 
+            background: white; padding: 30px; border-radius: 5px; margin-bottom: 40px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid #ccc;
+        }
+        .cabecalho { text-align: center; border-bottom: 2px solid #2c3e50; margin-bottom: 20px; padding-bottom: 10px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #000; padding: 8px; text-align: left; font-size: 13px; }
+        th { background: #ecf0f1; text-transform: uppercase; }
+
+        /* Cores para visualização */
+        .linha-p { background-color: #f1fcf4; } /* Verde bem clarinho */
+        .linha-a { background-color: #fff5f5; } /* Vermelho bem clarinho */
+        .status-p { color: #27ae60; font-weight: bold; }
+        .status-a { color: #c0392b; font-weight: bold; }
+
+        .btn-excluir { background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-top: 15px; float: right; }
+        .voltar { display: block; margin-bottom: 20px; text-decoration: none; color: #2c3e50; font-weight: bold; }
+        
+        @media print { .no-print { display: none; } .relatorio-folha { box-shadow: none; border: none; page-break-after: always; } }
     </style>
 </head>
 <body>
 
-    <a href="index.html" class="voltar">← Voltar ao Início</a>
-    <h2 style="text-align:center">HISTÓRICO DE TIRAGENS</h2>
+    <a href="index.html" class="voltar no-print">⬅ Voltar ao Início</a>
+    <button onclick="window.print()" class="no-print" style="margin-bottom:20px; padding:10px; cursor:pointer;">🖨️ IMPRIMIR TUDO / SALVAR PDF</button>
 
     <div id="lista-historico"></div>
 
     <script>
         function carregarHistorico() {
             const lista = document.getElementById('lista-historico');
-            const dados = JSON.parse(localStorage.getItem('historico_geral') || "[]");
+            const relatorios = JSON.parse(localStorage.getItem('historico_geral') || "[]");
 
-            if (dados.length === 0) {
-                lista.innerHTML = "<p style='text-align:center'>Nenhum relatório salvo.</p>";
+            if (relatorios.length === 0) {
+                lista.innerHTML = "<p style='text-align:center'>Nenhum relatório salvo no histórico.</p>";
                 return;
             }
 
-            lista.innerHTML = dados.map((rel, index) => `
-                <div class="card">
-                    <div class="header-rel">
-                        <div>
-                            <strong>${rel.data} - ${rel.turno}</strong> (às ${rel.hora})
-                        </div>
-                        <button class="btn-excluir" onclick="remover(${index})">Excluir</button>
+            lista.innerHTML = relatorios.map((rel, idx) => `
+                <div class="relatorio-folha">
+                    <div class="cabecalho">
+                        <h2 style="margin:0">RELATÓRIO DE TIRAGEM DE FALTAS</h2>
+                        <strong>TURNO: ${rel.turno} | DATA: ${rel.data} | HORA: ${rel.hora}</strong>
                     </div>
-                    <div>
-                        <small>Presentes: ${rel.estatisticas.presentes} | Faltas: ${rel.estatisticas.ausentes} (Just: ${rel.estatisticas.justificados})</small>
-                    </div>
+
+                    <p><strong>Resumo:</strong> Presentes: ${rel.estatisticas.presentes} | Ausentes: ${rel.estatisticas.ausentes}</p>
+
                     <table>
                         <thead>
-                            <tr><th>Militar Ausente</th><th>Motivo / Justificativa</th></tr>
+                            <tr>
+                                <th style="width: 40%;">Militar</th>
+                                <th style="width: 20%;">Situação</th>
+                                <th style="width: 40%;">Justificativa / Motivo</th>
+                            </tr>
                         </thead>
                         <tbody>
-                            ${rel.detalhes.map(m => `<tr><td>${m.nome}</td><td>${m.motivo}</td></tr>`).join('')}
-                            ${rel.detalhes.length === 0 ? '<tr><td colspan="2">Nenhuma falta registrada.</td></tr>' : ''}
+                            ${rel.listaCompleta.map(m => `
+                                <tr class="${m.status === 'P' ? 'linha-p' : 'linha-a'}">
+                                    <td>${m.nome}</td>
+                                    <td class="${m.status === 'P' ? 'status-p' : 'status-a'}">
+                                        ${m.status === 'P' ? 'PRESENTE' : 'AUSENTE'}
+                                    </td>
+                                    <td>${m.motivo || '-'}</td>
+                                </tr>
+                            `).join('')}
                         </tbody>
                     </table>
+                    
+                    <button class="btn-excluir no-print" onclick="remover(${idx})">Excluir este Relatório</button>
+                    <div style="clear:both"></div>
                 </div>
             `).join('');
         }
 
         function remover(index) {
-            if (confirm("Excluir este relatório permanentemente?")) {
-                const dados = JSON.parse(localStorage.getItem('historico_geral') || "[]");
-                dados.splice(index, 1);
-                localStorage.setItem('historico_geral', JSON.stringify(dados));
+            if (confirm("Deseja apagar este registro permanentemente?")) {
+                let rels = JSON.parse(localStorage.getItem('historico_geral'));
+                rels.splice(index, 1);
+                localStorage.setItem('historico_geral', JSON.stringify(rels));
                 carregarHistorico();
             }
         }
@@ -69,4 +94,3 @@
     </script>
 </body>
 </html>
-
