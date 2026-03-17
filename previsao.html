@@ -2,36 +2,55 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Previsão de Escala - Tiragem de Faltas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PREVISÃO DE ESCALA - CA</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 30px; letter-spacing: 2px; }
+        
+        .container { width: 90%; max-width: 600px; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background-color: #2c3e50; color: white; border-radius: 4px 4px 0 0; }
+        tr:last-child td { border-bottom: none; }
+        
+        .voltar { margin-top: 20px; text-decoration: none; color: #2c3e50; font-weight: bold; font-size: 14px; }
+        .voltar:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
-    <h1>Escala de Serviço - Previsão</h1>
-    
-    <table>
-        <thead>
-            <tr>
-                <th>Data</th>
-                <th>Turno</th>
-                <th>Responsável</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Você atualizará os dados aqui manualmente -->
-            <tr>
-                <td>18/03/2026</td>
-                <td>Manhã</td>
-                <td>Fulano de Tal</td>
-            </tr>
-        </tbody>
-    </table>
 
-    <br>
-    <a href="index.html">Voltar para o Início</a>
+    <h1>PREVISÃO DE SERVIÇO</h1>
+
+    <div class="container">
+        <table>
+            <thead>
+                <tr>
+                    <th>DATA</th>
+                    <th>TURNO</th>
+                    <th>NOME / SERVIÇO</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- VOCÊ ALTERA OS DADOS ABAIXO MANUALMENTE -->
+                <tr>
+                    <td>18/03 (Qua)</td>
+                    <td>Manhã</td>
+                    <td>Sgt. Silva / Permanência</td>
+                </tr>
+                <tr>
+                    <td>18/03 (Qua)</td>
+                    <td>Tarde</td>
+                    <td>Cabo Oliveira / Auxiliar</td>
+                </tr>
+                <!-- FIM DOS DADOS -->
+            </tbody>
+        </table>
+    </div>
+
+    <a href="index.html" class="voltar">⬅ Voltar ao Portal</a>
+
 </body>
 </html>
+
