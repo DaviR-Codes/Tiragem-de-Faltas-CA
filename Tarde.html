@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formatura Tarde</title>
+    <style>
+        :root { --bg: #f0f2f5; --pres: #2ecc71; --aus: #e74c3c; --dark: #2c3e50; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 15px; margin: 0; }
+        .militar-row { background: #fff; margin-bottom: 10px; padding: 15px; border-radius: 10px; border-left: 6px solid #95a5a6; }
+        .row-p { border-left-color: var(--pres) !important; }
+        .row-a { border-left-color: var(--aus) !important; }
+        .controles { display: flex; gap: 8px; margin-top: 10px; }
+        .btn { flex: 1; padding: 12px; border: 1px solid #ddd; background: #fff; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-p.active { background: var(--pres); color: #fff; }
+        .btn-a.active { background: var(--aus); color: #fff; }
+        select { width: 100%; padding: 10px; margin-top: 8px; border-radius: 5px; }
+        .acoes { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .btn-acao { padding: 15px; border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; }
+        
+        /* Estilo da Tabela de Visualização (PDF) */
+        #visualizacao { display: none; background: white; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #000; padding: 8px; text-align: left; }
+        
+        @media print {
+            .no-print { display: none !important; }
+            #visualizacao { display: block !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="no-print">
+    <h2>☀️ Formatura Manhã</h2>
+    <div id="lista"></div>
+    <div class="acoes">
+        <button onclick="window.print()" class="btn-acao" style="background: var(--dark)">📄 GERAR RELATÓRIO PDF</button>
+        <a href="tiragem.html" style="text-align: center; color: #7f8c8d; text-decoration: none; margin-top: 10px;">← Voltar</a>
+    </div>
+</div>
+
+<!-- Área que vira o Relatório -->
+<div id="visualizacao">
+    <h2 style="text-align: center;">RELATÓRIO DE FORMATURA - MANHÃ</h2>
+    <p id="data-rel"></p>
+    <table>
+        <thead><tr><th>Posto/Grad e Nome</th><th>Situação</th><th>Justificativa</th></tr></thead>
+        <tbody id="corpo-rel"></tbody>
+    </table>
+</div>
+
+<script>
+    const militares = ["Cb Jayme", "Cb Barcellos", "Cb Erick", "Cb Fernando", "Cb R. Costa", "Sd Josemir", "Sd Moisés", "Sd Ribeiro", "Sd Costa Dias", "Sd Campos", "Sd Souza", "Sd Flores", "Sd Bastos", "Sd Garcia", "Sd Adrian", "Sd Comin", "Sd Gracioli"];
+    let dados = JSON.parse(localStorage.getItem('efetivo_manha')) || militares.map(m => ({ nome: m, status: null, motivo: '' }));
+
+    function render() {
+        const container = document.getElementById('lista');
+        const corpoRel = document.getElementById('corpo-rel');
+        container.innerHTML = '';
+        corpoRel.innerHTML = '';
+
+        dados.forEach((d, i) => {
+            // Render na Tela
+            container.innerHTML += `
+                <div class="militar-row ${d.status ? 'row-' + d.status.toLowerCase() : ''}">
+                    <strong>${d.nome}</strong>
+                    <div class="controles">
+                        <button class="btn btn-p ${d.status === 'P' ? 'active' : ''}" onclick="marcar(${i}, 'P')">P</button>
+                        <button class="btn btn-a ${d.status === 'A' ? 'active' : ''}" onclick="marcar(${i}, 'A')">F</button>
+                    </div>
+                    ${d.status === 'A' ? `
+                    <select onchange="setMotivo(${i}, this.value)">
+                        <option value="">Justificar...</option>
+                        ${["Missão","Serviço","FSR","HGE","Dispensa","Atraso","Falta"].map(o => `<option value="${o}" ${d.motivo === o ? 'selected' : ''}>${o}</option>`).join('')}
+                    </select>` : ''}
+                </div>`;
+            
+            // Render no Relatório
+            corpoRel.innerHTML += `<tr><td>${d.nome}</td><td>${d.status || '-'}</td><td>${d.motivo || '-'}</td></tr>`;
+        });
+        document.getElementById('data-rel').innerText = "Data: " + new Date().toLocaleDateString();
+    }
+
+    function marcar(i, s) { 
+        dados[i].status = (dados[i].status === s) ? null : s;
+        if(s === 'P') dados[i].motivo = '';
+        salvar();
+    }
+    function setMotivo(i, v) { dados[i].motivo = v; salvar(); }
+    function salvar() { localStorage.setItem('efetivo_tarde', JSON.stringify(dados)); render(); }
+    
+    render();
+</script>
+</body>
+</html>
