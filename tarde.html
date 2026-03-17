@@ -8,7 +8,6 @@
         :root { --bg: #f0f2f5; --pres: #2ecc71; --aus: #e74c3c; --just: #3498db; --dark: #2c3e50; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 15px; margin: 0; }
         
-        /* Dashboard de Contagem */
         .dashboard { 
             display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; 
             position: sticky; top: 0; z-index: 100; background: var(--bg); padding-bottom: 10px;
@@ -27,16 +26,13 @@
         .btn-a.active { background: var(--aus); color: #fff; border-color: var(--aus); }
         
         select { width: 100%; padding: 10px; margin-top: 8px; border-radius: 5px; font-size: 16px; }
-        .btn-acao { width: 100%; padding: 15px; border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; margin-top: 20px; background: var(--dark); }
+        .btn-acao { width: 100%; padding: 15px; border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; margin-top: 10px; background: var(--dark); font-size: 14px; }
         
         #relatorio { display: none; background: white; padding: 20px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #000; padding: 8px; text-align: left; }
         
-        @media print {
-            .no-print { display: none !important; }
-            #relatorio { display: block !important; }
-        }
+        @media print { .no-print { display: none !important; } #relatorio { display: block !important; } }
     </style>
 </head>
 <body>
@@ -51,10 +47,11 @@
 
     <div id="lista"></div>
     
+    <button onclick="finalizarRelatorio()" class="btn-acao" style="background: #27ae60;">✅ FINALIZAR E SALVAR NO HISTÓRICO</button>
     <button onclick="window.print()" class="btn-acao">📄 GERAR PDF / IMPRIMIR</button>
-    <button onclick="limparTudo()" class="btn-acao" style="background:#7f8c8d; margin-top:10px;">ZERAR CHAMADA</button>
+    <button onclick="limparTudo()" class="btn-acao" style="background:#7f8c8d;">ZERAR CHAMADA</button>
     
-    <div style="text-align: center; margin-top: 20px;">
+    <div style="text-align: center; margin-top: 20px; padding-bottom: 30px;">
         <a href="tiragem.html" style="color:#7f8c8d; text-decoration:none; font-weight:bold;">← Voltar aos Turnos</a>
     </div>
 </div>
@@ -71,18 +68,15 @@
 <script>
     const militares = ["Cb Jayme", "Cb Barcellos", "Cb Erick", "Cb Fernando", "Cb R. Costa", "Sd Josemir", "Sd Moisés", "Sd Ribeiro", "Sd Costa Dias", "Sd Campos", "Sd Souza", "Sd Flores", "Sd Bastos", "Sd Garcia", "Sd Adrian", "Sd Comin", "Sd Gracioli"];
     
-    // Chave única para a tarde: 'efetivo_tarde'
     let dados = JSON.parse(localStorage.getItem('efetivo_tarde')) || militares.map(m => ({ nome: m, status: null, motivo: '' }));
 
     function render() {
         const container = document.getElementById('lista');
         const corpoRel = document.getElementById('corpo-rel');
         container.innerHTML = ''; corpoRel.innerHTML = '';
-
         let p = 0, a = 0, j = 0, nj = 0;
 
         dados.forEach((d, i) => {
-            // Lógica de Contagem
             if(d.status === 'P') p++;
             else if(d.status === 'A') {
                 a++;
@@ -90,7 +84,6 @@
                 else if(d.motivo !== "") j++;
             }
 
-            // Interface do Usuário
             container.innerHTML += `
                 <div class="militar-row ${d.status ? 'row-' + d.status.toLowerCase() : ''}">
                     <strong>${d.nome}</strong>
@@ -104,12 +97,9 @@
                         ${["Missão","Serviço","FSR","HGE","Dispensa","Atraso","Falta"].map(o => `<option value="${o}" ${d.motivo === o ? 'selected' : ''}>${o}</option>`).join('')}
                     </select>` : ''}
                 </div>`;
-
-            // Linha da Tabela PDF
             corpoRel.innerHTML += `<tr><td>${d.nome}</td><td>${d.status || '-'}</td><td>${d.motivo || '-'}</td></tr>`;
         });
 
-        // Atualiza Dashboard
         document.getElementById('cont-p').innerText = p;
         document.getElementById('cont-a').innerText = a;
         document.getElementById('cont-j').innerText = j;
@@ -118,33 +108,30 @@
     }
 
     function marcar(i, s) { 
-        if(dados[i].status === s) {
-            dados[i].status = null;
-            dados[i].motivo = '';
-        } else {
-            dados[i].status = s;
-            if(s === 'P') dados[i].motivo = '';
-        }
+        if(dados[i].status === s) { dados[i].status = null; dados[i].motivo = ''; } 
+        else { dados[i].status = s; if(s === 'P') dados[i].motivo = ''; }
         salvar();
     }
 
-    function setMotivo(i, v) { 
-        dados[i].motivo = v; 
-        salvar(); 
+    function setMotivo(i, v) { dados[i].motivo = v; salvar(); }
+    function salvar() { localStorage.setItem('efetivo_tarde', JSON.stringify(dados)); render(); }
+
+    function finalizarRelatorio() {
+        const relatorioFinal = {
+            id: Date.now(),
+            data: new Date().toLocaleDateString('pt-BR'),
+            hora: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}),
+            turno: "TARDE",
+            estatisticas: { presentes: document.getElementById('cont-p').innerText, ausentes: document.getElementById('cont-a').innerText },
+            detalhes: dados.filter(d => d.status === 'A')
+        };
+        const historico = JSON.parse(localStorage.getItem('historico_geral') || "[]");
+        historico.unshift(relatorioFinal);
+        localStorage.setItem('historico_geral', JSON.stringify(historico));
+        alert("Relatório da TARDE salvo no histórico!");
     }
 
-    function salvar() { 
-        localStorage.setItem('efetivo_tarde', JSON.stringify(dados)); 
-        render(); 
-    }
-
-    function limparTudo() {
-        if(confirm("Deseja zerar a tiragem da tarde?")) {
-            dados = militares.map(m => ({ nome: m, status: null, motivo: '' }));
-            salvar();
-        }
-    }
-    
+    function limparTudo() { if(confirm("Deseja zerar a tiragem da tarde?")) { dados = militares.map(m => ({ nome: m, status: null, motivo: '' })); salvar(); } }
     render();
 </script>
 </body>
