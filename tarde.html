@@ -26,7 +26,7 @@
         .btn-a.active { background: var(--aus); color: #fff; border-color: var(--aus); }
         
         select { width: 100%; padding: 10px; margin-top: 8px; border-radius: 5px; font-size: 16px; }
-        .btn-acao { width: 100%; padding: 15px; border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; margin-top: 10px; background: var(--dark); font-size: 14px; }
+        .btn-acao { width: 100%; padding: 15px; border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; margin-top: 10px; background: var(--dark); font-size: 14px; display: block; width: 100%; }
         
         #relatorio { display: none; background: white; padding: 20px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
@@ -57,8 +57,9 @@
 </div>
 
 <div id="relatorio">
-    <h2 style="text-align: center;">RELATÓRIO DE FORMATURA - TARDE</h2>
-    <p id="data-rel"></p>
+    <h2 style="text-align: center; margin-bottom: 5px;">RELATÓRIO DE FORMATURA</h2>
+    <h3 style="text-align: center; margin-top: 0; color: #555;">TURNO: TARDE</h3>
+    <p id="data-rel" style="text-align: center; font-weight: bold;"></p>
     <table>
         <thead><tr><th>Militar</th><th>Situação</th><th>Justificativa</th></tr></thead>
         <tbody id="corpo-rel"></tbody>
@@ -97,7 +98,7 @@
                         ${["Missão","Serviço","FSR","HGE","Dispensa","Atraso","Falta"].map(o => `<option value="${o}" ${d.motivo === o ? 'selected' : ''}>${o}</option>`).join('')}
                     </select>` : ''}
                 </div>`;
-            corpoRel.innerHTML += `<tr><td>${d.nome}</td><td>${d.status || '-'}</td><td>${d.motivo || '-'}</td></tr>`;
+            corpoRel.innerHTML += `<tr><td>${d.nome}</td><td>${d.status === 'P' ? 'PRESENTE' : (d.status === 'A' ? 'AUSENTE' : '-')}</td><td>${d.motivo || '-'}</td></tr>`;
         });
 
         document.getElementById('cont-p').innerText = p;
@@ -120,15 +121,14 @@
         const relatorioFinal = {
             id: Date.now(),
             data: new Date().toLocaleDateString('pt-BR'),
-            hora: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}),
             turno: "TARDE",
             estatisticas: { presentes: document.getElementById('cont-p').innerText, ausentes: document.getElementById('cont-a').innerText },
-            detalhes: dados.filter(d => d.status === 'A')
+            listaCompleta: dados
         };
         const historico = JSON.parse(localStorage.getItem('historico_geral') || "[]");
         historico.unshift(relatorioFinal);
         localStorage.setItem('historico_geral', JSON.stringify(historico));
-        alert("Relatório da TARDE salvo no histórico!");
+        alert("Relatório da TARDE salvo no histórico com sucesso!");
     }
 
     function limparTudo() { if(confirm("Deseja zerar a tiragem da tarde?")) { dados = militares.map(m => ({ nome: m, status: null, motivo: '' })); salvar(); } }
