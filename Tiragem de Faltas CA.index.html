@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Efetivo Militar</title>
+    <style>
+        :root {
+            --bg: #f0f2f5; --card: #ffffff; --pres: #2ecc71; --aus: #e74c3c;
+            --just: #3498db; --njust: #f39c12; --neutro: #95a5a6;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 15px; margin: 0; }
+        
+        /* Dashboard Fixo */
+        .dashboard { 
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; 
+            position: sticky; top: 0; z-index: 100; background: var(--bg); padding: 10px 0;
+        }
+        .stat-card { background: var(--card); padding: 10px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .stat-card small { font-size: 0.7em; font-weight: bold; color: #7f8c8d; }
+        .stat-card div { font-size: 1.3em; font-weight: bold; }
+
+        /* Lista de Militares */
+        .militar-row { 
+            background: var(--card); margin-bottom: 10px; padding: 15px; border-radius: 10px; 
+            border-left: 6px solid var(--neutro); transition: 0.2s;
+        }
+        .row-p { border-left-color: var(--pres) !important; background: #f0fff4; }
+        .row-a { border-left-color: var(--aus) !important; background: #fff5f5; }
+
+        .grad { font-weight: 900; color: #2c3e50; margin-right: 4px; }
+        .controles { display: flex; gap: 8px; margin-top: 10px; }
+        
+        .btn { 
+            flex: 1; padding: 12px; border: 2px solid #ddd; background: white; 
+            border-radius: 6px; font-weight: bold; color: #95a5a6; cursor: pointer;
+        }
+        .btn-p.active { background: var(--pres); color: white; border-color: var(--pres); }
+        .btn-a.active { background: var(--aus); color: white; border-color: var(--aus); }
+
+        .just-box { margin-top: 10px; display: none; }
+        select { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; }
+
+        /* Ações Finais */
+        .area-acoes { margin: 30px 0; display: flex; flex-direction: column; gap: 10px; }
+        .btn-acao { padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; font-size: 1em; color: white; }
+        .btn-whatsapp { background: #25d366; }
+        .btn-pdf { background: #34495e; }
+        .btn-limpar { background: #7f8c8d; margin-top: 10px; opacity: 0.7; }
+
+        /* Tabela de Impressão */
+        #tabela-impressao { display: none; width: 100%; border-collapse: collapse; margin-top: 20px; }
+        #tabela-impressao th, #tabela-impressao td { border: 1px solid #000; padding: 8px; text-align: left; }
+        
+        @media print {
+            .dashboard, .militar-row, .area-acoes { display: none !important; }
+            #tabela-impressao { display: table !important; }
+            .print-header { display: block !important; text-align: center; margin-bottom: 20px; }
+            body { background: white; }
+        }
+        .print-header { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="print-header">
+        <h2 id="titulo-pdf">RELATÓRIO DE EFETIVO</h2>
+        <p id="data-pdf"></p>
+    </div>
+
+    <div class="dashboard">
+        <div class="stat-card"><small>EM FORMA</small><div id="cont-p" style="color:var(--pres)">0</div></div>
+        <div class="stat-card"><small>AUSENTES</small><div id="cont-a" style="color:var(--aus)">0</div></div>
+        <div class="stat-card"><small>JUSTIF.</small><div id="cont-j" style="color:var(--just)">0</div></div>
+        <div class="stat-card"><small>N. JUSTIF.</small><div id="cont-nj" style="color:var(--njust)">0</div></div>
+    </div>
+
+    <div id="lista"></div>
+
+    <div class="area-acoes">
+        <button class="btn-acao btn-whatsapp" onclick="copiarRelatorio()">COPIAR TEXTO WHATSAPP</button>
+        <button class="btn-acao btn-pdf" onclick="prepararPDF()">GERAR PDF / IMPRIMIR</button>
+        <button class="btn-acao btn-limpar" onclick="limparTudo()">ZERAR LISTA (NOVA CHAMADA)</button>
+    </div>
+
+    <table id="tabela-impressao">
+        <thead>
+            <tr>
+                <th>Posto/Grad e Nome</th>
+                <th>Situação</th>
+                <th>Justificativa</th>
+            </tr>
+        </thead>
+        <tbody id="corpo-impressao"></tbody>
+    </table>
+
+    <script>
+        const militares = ["Cb Jayme", "Cb Barcellos", "Cb Erick", "Cb R. Costa", "Sd Josemir", "Sd Moisés", "Sd Ribeiro", "Sd Costa Dias", "Sd Campos", "Sd Souza", "Sd Flores", "Sd Comin", "Sd Garcia", "Sd Adrian"];
+        
+        // Carrega dados salvos ou inicia novo estado
+        let dados = JSON.parse(localStorage.getItem('efetivoMilitar')) || militares.map(m => ({ nome: m, status: null, motivo: '' }));
+
+        function render() {
+            const container = document.getElementById('lista');
+            container.innerHTML = militares.map((m, i) => {
+                const d = dados[i];
+                return `
+                <div class="militar-row ${d.status ? 'row-' + d.status.toLowerCase() : ''}" id="card-${i}">
+                    <div><span class="grad">${m.split(' ')[0]}</span> ${m.split(' ').slice(1).join(' ')}</div>
+                    <div class="controles">
+                        <button class="btn btn-p ${d.status === 'P' ? 'active' : ''}" onclick="marcar(${i}, 'P')">PRESENTE</button>
+                        <button class="btn btn-a ${d.status === 'A' ? 'active' : ''}" onclick="marcar(${i}, 'A')">FALTA</button>
+                    </div>
+                    <div class="just-box" id="just-box-${i}" style="display: ${d.status === 'A' ? 'block' : 'none'}">
+                        <select id="sel-${i}" onchange="setMotivo(${i}, this.value)">
+                            <option value="">Selecione o Motivo...</option>
+                            ${["Atraso","Falta","Missão","Serviço","Saindo de Serviço","FSR","HGE","Dispensa"].map(opt => 
+                                `<option value="${opt}" ${d.motivo === opt ? 'selected' : ''}>${opt}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                </div>`;
+            }).join('');
+            atualizarContadores();
+        }
+
+        function marcar(idx, tipo) {
+            if (dados[idx].status === tipo) {
+                dados[idx].status = null;
+                dados[idx].motivo = '';
+            } else {
+                dados[idx].status = tipo;
+                if (tipo === 'P') dados[idx].motivo = '';
+            }
+            salvar();
+        }
+
+        function setMotivo(idx, val) {
+            dados[idx].motivo = val;
+            salvar();
+        }
+
+        function salvar() {
+            localStorage.setItem('efetivoMilitar', JSON.stringify(dados));
+            render();
+        }
+
+        function atualizarContadores() {
+            let p = 0, a = 0, j = 0, nj = 0;
+            dados.forEach(d => {
+                if (d.status === 'P') p++;
+                else if (d.status === 'A') {
+                    a++;
+                    if (d.motivo === 'Falta' || d.motivo === 'Atraso') nj++;
+                    else if (d.motivo !== '') j++;
+                }
+            });
+            document.getElementById('cont-p').innerText = p;
+            document.getElementById('cont-a').innerText = a;
+            document.getElementById('cont-j').innerText = j;
+            document.getElementById('cont-nj').innerText = nj;
+        }
+
+        function copiarRelatorio() {
+            let rel = "*RELATÓRIO DE EFETIVO*\n\n";
+            const p = dados.filter(d => d.status === 'P');
+            const a = dados.filter(d => d.status === 'A');
+            rel += `✅ *EM FORMA (${p.length}):*\n` + (p.map(d => `- ${d.nome}`).join('\n') || "Nenhum") + "\n\n";
+            rel += `❌ *AUSENTES (${a.length}):*\n` + (a.map(d => `- ${d.nome} (${d.motivo || 'Sem justificativa'})`).join('\n') || "Nenhum") + "\n\n";
+            rel += `*RESUMO:* Presentes: ${p.length} | Just.: ${document.getElementById('cont-j').innerText} | N. Just.: ${document.getElementById('cont-nj').innerText}`;
+            
+            const el = document.createElement('textarea'); el.value = rel; document.body.appendChild(el); el.select();
+            document.execCommand('copy'); document.body.removeChild(el);
+            alert("Copiado para o WhatsApp!");
+        }
+
+        function prepararPDF() {
+            const corpo = document.getElementById('corpo-impressao');
+            document.getElementById('data-pdf').innerText = "Gerado em: " + new Date().toLocaleString();
+            corpo.innerHTML = dados.map(d => `<tr><td>${d.nome}</td><td>${d.status === 'P' ? 'PRESENTE' : (d.status === 'A' ? 'AUSENTE' : '-')}</td><td>${d.motivo || '-'}</td></tr>`).join('');
+            window.print();
+        }
+
+        function limparTudo() {
+            if (confirm("Deseja zerar toda a lista e iniciar uma nova chamada?")) {
+                localStorage.removeItem('efetivoMilitar');
+                location.reload();
+            }
+        }
+
+        render();
+    </script>
+</body>
+</html>
