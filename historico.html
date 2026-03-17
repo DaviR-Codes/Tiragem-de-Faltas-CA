@@ -3,94 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Histórico Completo de Formaturas</title>
+    <title>Histórico de Tiragens</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 20px; }
-        .relatorio-folha { 
-            background: white; padding: 30px; border-radius: 5px; margin-bottom: 40px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid #ccc;
+        :root { --dark: #2c3e50; --bg: #f0f2f5; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 20px; margin: 0; }
+        
+        .container { max-width: 800px; margin: 0 auto; }
+        .no-print { text-align: center; margin-bottom: 20px; }
+        
+        /* Estilo da Lista Principal */
+        .item-historico { 
+            background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; 
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-left: 5px solid var(--dark);
         }
-        .cabecalho { text-align: center; border-bottom: 2px solid #2c3e50; margin-bottom: 20px; padding-bottom: 10px; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid #000; padding: 8px; text-align: left; font-size: 13px; }
-        th { background: #ecf0f1; text-transform: uppercase; }
+        .btn-ver { background: var(--dark); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        .btn-excluir { background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-left: 5px; }
 
-        /* Cores para visualização */
-        .linha-p { background-color: #f1fcf4; } /* Verde bem clarinho */
-        .linha-a { background-color: #fff5f5; } /* Vermelho bem clarinho */
-        .status-p { color: #27ae60; font-weight: bold; }
-        .status-a { color: #c0392b; font-weight: bold; }
+        /* Estilo do Relatório Individual (Escondido por padrão) */
+        #detalhe-relatorio { display: none; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #000; padding: 8px; text-align: left; }
+        th { background: #eee; }
+        .linha-p { background-color: #f1fcf4; } /* Verde para presentes */
+        .linha-a { background-color: #fff5f5; } /* Vermelho para ausentes */
 
-        .btn-excluir { background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-top: 15px; float: right; }
-        .voltar { display: block; margin-bottom: 20px; text-decoration: none; color: #2c3e50; font-weight: bold; }
-        
-        @media print { .no-print { display: none; } .relatorio-folha { box-shadow: none; border: none; page-break-after: always; } }
+        @media print {
+            .no-print, #lista-container { display: none !important; }
+            #detalhe-relatorio { display: block !important; box-shadow: none; padding: 0; }
+        }
     </style>
 </head>
 <body>
 
-    <a href="index.html" class="voltar no-print">⬅ Voltar ao Início</a>
-    <button onclick="window.print()" class="no-print" style="margin-bottom:20px; padding:10px; cursor:pointer;">🖨️ IMPRIMIR TUDO / SALVAR PDF</button>
+<div class="container">
+    <div class="no-print">
+        <a href="index.html" style="text-decoration:none; color:var(--dark); font-weight:bold;">⬅ Voltar ao Início</a>
+        <h2>HISTÓRICO DE RELATÓRIOS</h2>
+    </div>
 
-    <div id="lista-historico"></div>
+    <!-- VISTA 1: LISTA DE RELATÓRIOS -->
+    <div id="lista-container">
+        <div id="lista-corpo"></div>
+    </div>
 
-    <script>
-        function carregarHistorico() {
-            const lista = document.getElementById('lista-historico');
-            const relatorios = JSON.parse(localStorage.getItem('historico_geral') || "[]");
+    <!-- VISTA 2: DETALHES DO RELATÓRIO SELECIONADO -->
+    <div id="detalhe-relatorio">
+        <button class="no-print" onclick="fecharDetalhes()" style="margin-bottom:20px; cursor:pointer;">⬅ Voltar para a Lista</button>
+        <button class="no-print" onclick="window.print()" style="margin-bottom:20px; cursor:pointer; background:#27ae60; color:white; border:none; padding:5px 10px; border-radius:3px;">🖨️ Imprimir Este</button>
+        
+        <div id="conteudo-relatorio">
+            <!-- Preenchido via JS -->
+        </div>
+    </div>
+</div>
 
-            if (relatorios.length === 0) {
-                lista.innerHTML = "<p style='text-align:center'>Nenhum relatório salvo no histórico.</p>";
-                return;
-            }
+<script>
+    function carregarLista() {
+        const historico = JSON.parse(localStorage.getItem('historico_geral') || "[]");
+        const corpo = document.getElementById('lista-corpo');
+        
+        document.getElementById('lista-container').style.display = 'block';
+        document.getElementById('detalhe-relatorio').style.display = 'none';
 
-            lista.innerHTML = relatorios.map((rel, idx) => `
-                <div class="relatorio-folha">
-                    <div class="cabecalho">
-                        <h2 style="margin:0">RELATÓRIO DE TIRAGEM DE FALTAS</h2>
-                        <strong>TURNO: ${rel.turno} | DATA: ${rel.data} | HORA: ${rel.hora}</strong>
-                    </div>
+        if (historico.length === 0) {
+            corpo.innerHTML = "<p style='text-align:center'>Nenhum relatório salvo.</p>";
+            return;
+        }
 
-                    <p><strong>Resumo:</strong> Presentes: ${rel.estatisticas.presentes} | Ausentes: ${rel.estatisticas.ausentes}</p>
-
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 40%;">Militar</th>
-                                <th style="width: 20%;">Situação</th>
-                                <th style="width: 40%;">Justificativa / Motivo</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${rel.listaCompleta.map(m => `
-                                <tr class="${m.status === 'P' ? 'linha-p' : 'linha-a'}">
-                                    <td>${m.nome}</td>
-                                    <td class="${m.status === 'P' ? 'status-p' : 'status-a'}">
-                                        ${m.status === 'P' ? 'PRESENTE' : 'AUSENTE'}
-                                    </td>
-                                    <td>${m.motivo || '-'}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                    
-                    <button class="btn-excluir no-print" onclick="remover(${idx})">Excluir este Relatório</button>
-                    <div style="clear:both"></div>
+        corpo.innerHTML = historico.map((rel, index) => `
+            <div class="item-historico">
+                <div>
+                    <strong>${rel.data}</strong> - Turno: ${rel.turno}
+                    <br><small>Presentes: ${rel.estatisticas.presentes} | Ausentes: ${rel.estatisticas.ausentes}</small>
                 </div>
-            `).join('');
-        }
+                <div>
+                    <button class="btn-ver" onclick="verDetalhes(${index})">Visualizar</button>
+                    <button class="btn-excluir" onclick="remover(${index})">X</button>
+                </div>
+            </div>
+        `).join('');
+    }
 
-        function remover(index) {
-            if (confirm("Deseja apagar este registro permanentemente?")) {
-                let rels = JSON.parse(localStorage.getItem('historico_geral'));
-                rels.splice(index, 1);
-                localStorage.setItem('historico_geral', JSON.stringify(rels));
-                carregarHistorico();
-            }
-        }
+    function verDetalhes(index) {
+        const historico = JSON.parse(localStorage.getItem('historico_geral'));
+        const rel = historico[index];
+        const conteudo = document.getElementById('conteudo-relatorio');
 
-        carregarHistorico();
-    </script>
+        document.getElementById('lista-container').style.display = 'none';
+        document.getElementById('detalhe-relatorio').style.display = 'block';
+
+        conteudo.innerHTML = `
+            <div style="text-align:center; border-bottom: 2px solid #000; margin-bottom:20px;">
+                <h2 style="margin:0">RELATÓRIO DE TIRAGEM DE FALTAS</h2>
+                <p><strong>DATA: ${rel.data} | TURNO: ${rel.turno}</strong></p>
+            </div>
+            <p><strong>Resumo:</strong> Presentes: ${rel.estatisticas.presentes} | Ausentes: ${rel.estatisticas.ausentes}</p>
+            <table>
+                <thead>
+                    <tr><th>Militar</th><th>Situação</th><th>Justificativa</th></tr>
+                </thead>
+                <tbody>
+                    ${rel.listaCompleta.map(m => `
+                        <tr class="${m.status === 'P' ? 'linha-p' : 'linha-a'}">
+                            <td>${m.nome}</td>
+                            <td>${m.status === 'P' ? 'PRESENTE' : (m.status === 'A' ? 'AUSENTE' : '-')}</td>
+                            <td>${m.motivo || '-'}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            <div style="margin-top:50px; text-align:center;">
+                <p>___________________________________________________</p>
+                <p>Assinatura do Responsável</p>
+            </div>
+        `;
+    }
+
+    function fecharDetalhes() {
+        carregarLista();
+    }
+
+    function remover(index) {
+        if(confirm("Excluir este relatório permanentemente?")) {
+            let historico = JSON.parse(localStorage.getItem('historico_geral'));
+            historico.splice(index, 1);
+            localStorage.setItem('historico_geral', JSON.stringify(historico));
+            carregarLista();
+        }
+    }
+
+    // Iniciar a página
+    carregarLista();
+</script>
+
 </body>
 </html>
