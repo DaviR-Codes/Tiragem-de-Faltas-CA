@@ -11,7 +11,6 @@
         }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 15px; margin: 0; }
         
-        /* Dashboard Fixo */
         .dashboard { 
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; 
             position: sticky; top: 0; z-index: 100; background: var(--bg); padding: 10px 0;
@@ -20,7 +19,6 @@
         .stat-card small { font-size: 0.7em; font-weight: bold; color: #7f8c8d; }
         .stat-card div { font-size: 1.3em; font-weight: bold; }
 
-        /* Lista de Militares */
         .militar-row { 
             background: var(--card); margin-bottom: 10px; padding: 15px; border-radius: 10px; 
             border-left: 6px solid var(--neutro); transition: 0.2s;
@@ -41,14 +39,12 @@
         .just-box { margin-top: 10px; display: none; }
         select { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; }
 
-        /* Ações Finais */
         .area-acoes { margin: 30px 0; display: flex; flex-direction: column; gap: 10px; }
         .btn-acao { padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; font-size: 1em; color: white; }
         .btn-whatsapp { background: #25d366; }
         .btn-pdf { background: #34495e; }
         .btn-limpar { background: #7f8c8d; margin-top: 10px; opacity: 0.7; }
 
-        /* Tabela de Impressão */
         #tabela-impressao { display: none; width: 100%; border-collapse: collapse; margin-top: 20px; }
         #tabela-impressao th, #tabela-impressao td { border: 1px solid #000; padding: 8px; text-align: left; }
         
@@ -95,10 +91,21 @@
     </table>
 
     <script>
-        const militares = ["Cb Jayme", "Cb Barcellos", "Cb Erick", "Cb R. Costa", "Sd Josemir", "Sd Moisés", "Sd Ribeiro", "Sd Costa Dias", "Sd Campos", "Sd Souza", "Sd Flores", "Sd Comin", "Sd Garcia", "Sd Adrian"];
+        const militares = [
+            "Cb Jayme", "Cb Barcellos", "Cb Erick", "Cb Fernando", "Cb R. Costa", 
+            "Sd Josemir", "Sd Moisés", "Sd Ribeiro", "Sd Costa Dias", "Sd Campos", 
+            "Sd Souza", "Sd Flores", "Sd Comin", "Sd Garcia", "Sd Adrian"
+        ];
         
-        // Carrega dados salvos ou inicia novo estado
         let dados = JSON.parse(localStorage.getItem('efetivoMilitar')) || militares.map(m => ({ nome: m, status: null, motivo: '' }));
+
+        // Sincroniza se a lista de militares mudar (adicionar/remover nomes)
+        if (dados.length !== militares.length) {
+            dados = militares.map(m => {
+                const existente = dados.find(d => d.nome === m);
+                return existente ? existente : { nome: m, status: null, motivo: '' };
+            });
+        }
 
         function render() {
             const container = document.getElementById('lista');
