@@ -3,48 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PREVISÃO DE ESCALA - CA</title>
+    <title>PREVISÃO ESCALA - CA</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
-        h1 { color: #2c3e50; text-align: center; margin-bottom: 30px; letter-spacing: 2px; }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 20px; letter-spacing: 1px; font-size: 22px; text-decoration: underline; }
         
-        .container { width: 90%; max-width: 600px; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .table-container { width: 98%; max-width: 1000px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow-x: auto; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background-color: #2c3e50; color: white; border-radius: 4px 4px 0 0; }
-        tr:last-child td { border-bottom: none; }
+        table { width: 100%; border-collapse: collapse; border: 1px solid #000; }
+        th, td { border: 1px solid #000; padding: 10px; text-align: center; font-size: 13px; min-width: 120px; }
         
-        .voltar { margin-top: 20px; text-decoration: none; color: #2c3e50; font-weight: bold; font-size: 14px; }
-        .voltar:hover { text-decoration: underline; }
+        /* Cabeçalho das datas */
+        thead th { background-color: #fff; color: #000; font-weight: bold; text-transform: uppercase; }
+        
+        /* Coluna das funções (Guarda, Fax Pav...) */
+        .row-label { background-color: #fff; font-weight: bold; width: 150px; text-align: center; }
+        
+        .voltar { margin-top: 25px; text-decoration: none; color: #2c3e50; font-weight: bold; font-size: 15px; border: 1px solid #2c3e50; padding: 8px 15px; border-radius: 5px; transition: 0.3s; }
+        .voltar:hover { background: #2c3e50; color: #fff; }
+
+        /* Estilo para quebras de linha dentro da célula */
+        td { white-space: pre-line; } 
     </style>
 </head>
 <body>
 
-    <h1>PREVISÃO DE SERVIÇO</h1>
+    <h1>PREVISÃO ESCALA DE SERVIÇO / CA</h1>
 
-    <div class="container">
+    <div class="table-container">
         <table>
             <thead>
                 <tr>
-                    <th>DATA</th>
-                    <th>TURNO</th>
-                    <th>NOME / SERVIÇO</th>
+                    <th style="border: none;"></th> <!-- Célula vazia no canto superior esquerdo -->
+                    <th>QUARTA-FEIRA<br>18/03/26</th>
+                    <th>QUINTA-FEIRA<br>19/03/26</th>
+                    <th>SEXTA-FEIRA<br>20/03/26</th>
+                    <th>SÁBADO<br>21/03/26</th>
+                    <th>DOMINGO<br>22/03/26</th>
+                    <th>SEGUNDA-FEIRA<br>23/03/26</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- VOCÊ ALTERA OS DADOS ABAIXO MANUALMENTE -->
+                <!-- LINHA DA GUARDA -->
                 <tr>
-                    <td>18/03 (Qua)</td>
-                    <td>Manhã</td>
-                    <td>Sgt. Silva / Permanência</td>
+                    <td class="row-label">GUARDA</td>
+                    <td>SD FLORES
+                        SD ADRIAN</td> <!-- Basta dar enter para quebrar a linha aqui -->
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
                 </tr>
+                <!-- LINHA DO FAX PAV / CMDO -->
                 <tr>
-                    <td>18/03 (Qua)</td>
-                    <td>Tarde</td>
-                    <td>Cabo Oliveira / Auxiliar</td>
+                    <td class="row-label">FAX PAV<br>CMDO</td>
+                    <td>SD SOUZA</td>
+                    <td>-</td>
+                    <td>SD COSTA DIAS</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>SD MOISÉS</td>
                 </tr>
-                <!-- FIM DOS DADOS -->
             </tbody>
         </table>
     </div>
