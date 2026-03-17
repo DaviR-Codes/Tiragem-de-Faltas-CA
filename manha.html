@@ -5,15 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formatura Manhã</title>
     <style>
-        :root { --bg: #f0f2f5; --pres: #2ecc71; --aus: #e74c3c; --dark: #2c3e50; }
+        :root { --bg: #f0f2f5; --pres: #2ecc71; --aus: #e74c3c; --just: #3498db; --dark: #2c3e50; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 15px; margin: 0; }
+        
+        /* Dashboard de Contagem */
+        .dashboard { 
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; 
+            position: sticky; top: 0; z-index: 100; background: var(--bg); padding-bottom: 10px;
+        }
+        .stat-card { background: #fff; padding: 8px 2px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .stat-card small { font-size: 0.6em; font-weight: bold; color: #7f8c8d; display: block; }
+        .stat-card div { font-size: 1.1em; font-weight: bold; }
+
         .militar-row { background: #fff; margin-bottom: 10px; padding: 15px; border-radius: 10px; border-left: 6px solid #95a5a6; }
         .row-p { border-left-color: var(--pres) !important; }
         .row-a { border-left-color: var(--aus) !important; }
+        
         .controles { display: flex; gap: 8px; margin-top: 10px; }
-        .btn { flex: 1; padding: 12px; border: 1px solid #ddd; background: #fff; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .btn-p.active { background: var(--pres); color: #fff; }
-        .btn-a.active { background: var(--aus); color: #fff; }
+        .btn { flex: 1; padding: 12px; border: 1px solid #ddd; background: #fff; border-radius: 6px; font-weight: bold; cursor: pointer; color: #95a5a6; }
+        .btn-p.active { background: var(--pres); color: #fff; border-color: var(--pres); }
+        .btn-a.active { background: var(--aus); color: #fff; border-color: var(--aus); }
+        
         select { width: 100%; padding: 10px; margin-top: 8px; border-radius: 5px; font-size: 16px; }
         .btn-acao { width: 100%; padding: 15px; border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; margin-top: 20px; background: var(--dark); }
         
@@ -30,11 +42,20 @@
 <body>
 
 <div class="no-print">
-    <h2 style="color:var(--dark)">☀️ Tiragem: Manhã</h2>
+    <div class="dashboard">
+        <div class="stat-card"><small>PRES.</small><div id="cont-p" style="color:var(--pres)">0</div></div>
+        <div class="stat-card"><small>AUSENT.</small><div id="cont-a" style="color:var(--aus)">0</div></div>
+        <div class="stat-card"><small>JUSTIF.</small><div id="cont-j" style="color:var(--just)">0</div></div>
+        <div class="stat-card"><small>N. JUST.</small><div id="cont-nj" style="color:var(--aus)">0</div></div>
+    </div>
+
     <div id="lista"></div>
+    
     <button onclick="window.print()" class="btn-acao">📄 GERAR PDF / IMPRIMIR</button>
+    <button onclick="limparTudo()" class="btn-acao" style="background:#7f8c8d; margin-top:10px;">ZERAR CHAMADA</button>
+    
     <div style="text-align: center; margin-top: 20px;">
-        <a href="tiragem.html" style="color:#7f8c8d; text-decoration:none;">← Voltar</a>
+        <a href="tiragem.html" style="color:#7f8c8d; text-decoration:none; font-weight:bold;">← Voltar aos Turnos</a>
     </div>
 </div>
 
@@ -49,6 +70,8 @@
 
 <script>
     const militares = ["Cb Jayme", "Cb Barcellos", "Cb Erick", "Cb Fernando", "Cb R. Costa", "Sd Josemir", "Sd Moisés", "Sd Ribeiro", "Sd Costa Dias", "Sd Campos", "Sd Souza", "Sd Flores", "Sd Bastos", "Sd Garcia", "Sd Adrian", "Sd Comin", "Sd Gracioli"];
+    
+    // Chave única para a manhã: 'efetivo_manha'
     let dados = JSON.parse(localStorage.getItem('efetivo_manha')) || militares.map(m => ({ nome: m, status: null, motivo: '' }));
 
     function render() {
@@ -56,13 +79,24 @@
         const corpoRel = document.getElementById('corpo-rel');
         container.innerHTML = ''; corpoRel.innerHTML = '';
 
+        let p = 0, a = 0, j = 0, nj = 0;
+
         dados.forEach((d, i) => {
+            // Lógica de Contagem
+            if(d.status === 'P') p++;
+            else if(d.status === 'A') {
+                a++;
+                if(["Falta", "Atraso"].includes(d.motivo)) nj++;
+                else if(d.motivo !== "") j++;
+            }
+
+            // Interface do Usuário
             container.innerHTML += `
                 <div class="militar-row ${d.status ? 'row-' + d.status.toLowerCase() : ''}">
                     <strong>${d.nome}</strong>
                     <div class="controles">
-                        <button class="btn btn-p ${d.status === 'P' ? 'active' : ''}" onclick="marcar(${i}, 'P')">PRESENTE</button>
-                        <button class="btn btn-a ${d.status === 'A' ? 'active' : ''}" onclick="marcar(${i}, 'A')">FALTA</button>
+                        <button class="btn btn-p ${d.status === 'P' ? 'active' : ''}" onclick="marcar(${i}, 'P')">P</button>
+                        <button class="btn btn-a ${d.status === 'A' ? 'active' : ''}" onclick="marcar(${i}, 'A')">F</button>
                     </div>
                     ${d.status === 'A' ? `
                     <select onchange="setMotivo(${i}, this.value)">
@@ -70,20 +104,48 @@
                         ${["Missão","Serviço","FSR","HGE","Dispensa","Atraso","Falta"].map(o => `<option value="${o}" ${d.motivo === o ? 'selected' : ''}>${o}</option>`).join('')}
                     </select>` : ''}
                 </div>`;
+
+            // Linha da Tabela PDF
             corpoRel.innerHTML += `<tr><td>${d.nome}</td><td>${d.status || '-'}</td><td>${d.motivo || '-'}</td></tr>`;
         });
+
+        // Atualiza Dashboard
+        document.getElementById('cont-p').innerText = p;
+        document.getElementById('cont-a').innerText = a;
+        document.getElementById('cont-j').innerText = j;
+        document.getElementById('cont-nj').innerText = nj;
         document.getElementById('data-rel').innerText = "Data: " + new Date().toLocaleDateString('pt-BR');
     }
 
     function marcar(i, s) { 
-        dados[i].status = (dados[i].status === s) ? null : s;
-        if(s === 'P') dados[i].motivo = '';
+        if(dados[i].status === s) {
+            dados[i].status = null;
+            dados[i].motivo = '';
+        } else {
+            dados[i].status = s;
+            if(s === 'P') dados[i].motivo = '';
+        }
         salvar();
     }
-    function setMotivo(i, v) { dados[i].motivo = v; salvar(); }
-    function salvar() { localStorage.setItem('efetivo_manha', JSON.stringify(dados)); render(); }
+
+    function setMotivo(i, v) { 
+        dados[i].motivo = v; 
+        salvar(); 
+    }
+
+    function salvar() { 
+        localStorage.setItem('efetivo_manha', JSON.stringify(dados)); 
+        render(); 
+    }
+
+    function limparTudo() {
+        if(confirm("Deseja zerar a tiragem da manhã?")) {
+            dados = militares.map(m => ({ nome: m, status: null, motivo: '' }));
+            salvar();
+        }
+    }
+    
     render();
 </script>
 </body>
 </html>
-
