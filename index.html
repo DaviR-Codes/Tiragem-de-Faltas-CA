@@ -5,20 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SISTEMA DE CONTROLE CA</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .menu-container { width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 15px; }
-        h1 { color: #2c3e50; text-align: center; margin-bottom: 30px; letter-spacing: 2px; }
-        .btn-portal { padding: 25px; border: none; border-radius: 12px; background: #fff; color: #2c3e50; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.3s; text-decoration: none; text-align: center; display: block; }
-        .btn-portal:hover { transform: translateY(-3px); background: #2c3e50; color: #fff; }
-        .disabled { opacity: 0.5; cursor: not-allowed; background: #eee; color: #999; }
+        :root { --primary: #2c3e50; --secondary: #34495e; --accent: #27ae60; --bg: #f0f2f5; }
+        
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: var(--bg); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            margin: 0; 
+        }
+
+        h1 { 
+            color: var(--primary); 
+            text-align: center; 
+            margin-bottom: 30px; 
+            letter-spacing: 2px; 
+            font-size: 24px;
+            text-transform: uppercase;
+        }
+
+        .menu-container { 
+            width: 90%; 
+            max-width: 400px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+        }
+
+        .btn-portal { 
+            padding: 20px; 
+            border: none; 
+            border-radius: 12px; 
+            background: #fff; 
+            color: var(--primary); 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            transition: 0.3s; 
+            text-decoration: none; 
+            text-align: center; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-portal:hover { 
+            transform: translateY(-3px); 
+            background: var(--primary); 
+            color: #fff; 
+        }
+
+        /* Destaque para o botão de Histórico */
+        .btn-historico {
+            border: 2px solid var(--primary);
+            background: #ebedef;
+        }
+
+        footer {
+            margin-top: 40px;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
     </style>
 </head>
 <body>
+
     <h1>PORTAL DE CONTROLE CA</h1>
+
     <div class="menu-container">
-    <a href="tiragem.html" class="btn-portal">📋 TIRAGEM DE FALTAS</a>
-    <!-- Link atualizado para previsao.html -->
-    <a href="previsao.html" class="btn-portal">📅 PREVISÃO DE ESCALA</a>
- </div>
+        <!-- Parte de Tiragem de Faltas -->
+        <a href="tiragem.html" class="btn-portal">
+            <span>📋</span> TIRAGEM DE FALTAS (CHAMADA)
+        </a>
+
+        <a href="historico.html" class="btn-portal btn-historico">
+            <span>🗂️</span> HISTÓRICO DE RELATÓRIOS
+        </a>
+
+        <hr style="width: 100%; border: 0; border-top: 1px solid #ccc; margin: 10px 0;">
+
+        <!-- Parte de Previsão (Visualização) -->
+        <a href="previsao.html" class="btn-portal">
+            <span>📅</span> PREVISÃO DE ESCALA
+        </a>
+    </div>
+
+    <footer>
+        Sistema de Controle Interno - 2026
+    </footer>
+
 </body>
 </html>
