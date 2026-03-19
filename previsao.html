@@ -7,22 +7,13 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
         h1 { color: #2c3e50; text-align: center; margin-bottom: 20px; letter-spacing: 1px; font-size: 22px; text-decoration: underline; }
-        
-        .table-container { width: 98%; max-width: 1000px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow-x: auto; }
-        
+        .table-container { width: 98%; max-width: 1100px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; border: 1px solid #000; }
-        th, td { border: 1px solid #000; padding: 10px; text-align: center; font-size: 13px; min-width: 120px; }
-        
-        /* Cabeçalho das datas */
+        th, td { border: 1px solid #000; padding: 10px; text-align: center; font-size: 13px; min-width: 110px; }
         thead th { background-color: #fff; color: #000; font-weight: bold; text-transform: uppercase; }
-        
-        /* Coluna das funções (Guarda, Fax Pav...) */
-        .row-label { background-color: #fff; font-weight: bold; width: 150px; text-align: center; }
-        
+        .row-label { background-color: #fff; font-weight: bold; width: 130px; text-align: center; }
         .voltar { margin-top: 25px; text-decoration: none; color: #2c3e50; font-weight: bold; font-size: 15px; border: 1px solid #2c3e50; padding: 8px 15px; border-radius: 5px; transition: 0.3s; }
         .voltar:hover { background: #2c3e50; color: #fff; }
-
-        /* Estilo para quebras de linha dentro da célula */
         td { white-space: pre-line; } 
     </style>
 </head>
@@ -34,36 +25,41 @@
         <table>
             <thead>
                 <tr>
-                    <th style="border: none;"></th> <!-- Célula vazia no canto superior esquerdo -->
-                    <th>QUARTA-FEIRA<br>18/03/26</th>
-                    <th>QUINTA-FEIRA<br>19/03/26</th>
-                    <th>SEXTA-FEIRA<br>20/03/26</th>
-                    <th>SÁBADO<br>21/03/26</th>
-                    <th>DOMINGO<br>22/03/26</th>
-                    <th>SEGUNDA-FEIRA<br>23/03/26</th>
+                    <th style="border: none;"></th>
+                    <th>SEG<br>23/03</th>
+                    <th>TER<br>24/03</th>
+                    <th>QUA<br>25/03</th>
+                    <th>QUI<br>26/03</th>
+                    <th>SEX<br>27/03</th>
+                    <th>SAB<br>28/03</th>
+                    <th>DOM<br>29/03</th>
+                    <th>SEG<br>30/03</th>
                 </tr>
             </thead>
             <tbody>
                 <!-- LINHA DA GUARDA -->
                 <tr>
                     <td class="row-label">GUARDA</td>
-                    <td>SD FLORES
-                        SD ADRIAN</td> <!-- Basta dar enter para quebrar a linha aqui -->
-                    <td>SD MOISÉS
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
+                    <td>FLORES<br>ADRIAN</td>
+                    <td>RIBEIRO<br>COSTA DIAS<br>SOUZA</td>
+                    <td>CAMPOS<br>GARCIA</td>
+                    <td>MOISES<br>COMIN<br>GRACIOLI</td>
+                    <td>FLORES<br>ADRIAN</td>
+                    <td>RIBEIRO<br>COSTA DIAS<br>SOUZA</td>
+                    <td>COMIN<br>GRACIOLI</td>
+                    <td>CAMPOS<br>GARCIA</td>
                 </tr>
                 <!-- LINHA DO FAX PAV / CMDO -->
                 <tr>
                     <td class="row-label">FAX PAV<br>CMDO</td>
-                    <td>SD SOUZA</td>
+                    <td>COMIN</td>
                     <td>-</td>
-                    <td>SD COSTA DIAS</td>
+                    <td>MOISES</td>
+                    <td>-</td>
+                    <td>SOUZA</td>
                     <td>-</td>
                     <td>-</td>
-                    <td>SD MOISÉS</td>
+                    <td>COSTA DIAS</td>
                 </tr>
             </tbody>
         </table>
@@ -73,4 +69,3 @@
 
 </body>
 </html>
-
