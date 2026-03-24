@@ -95,7 +95,7 @@
                     ${d.status === 'A' ? `
                     <select onchange="setMotivo(${i}, this.value)">
                         <option value="">Justificar...</option>
-                        ${["Missão","Serviço","FSR","HGE","Dispensa","Atraso","Falta"].map(o => `<option value="${o}" ${d.motivo === o ? 'selected' : ''}>${o}</option>`).join('')}
+                        ${["Férias","Missão","Serviço","FSR","HGE","Dispensa","Atraso","Falta"].map(o => `<option value="${o}" ${d.motivo === o ? 'selected' : ''}>${o}</option>`).join('')}
                     </select>` : ''}
                 </div>`;
             corpoRel.innerHTML += `<tr><td>${d.nome}</td><td>${d.status === 'P' ? 'PRESENTE' : (d.status === 'A' ? 'AUSENTE' : '-')}</td><td>${d.motivo || '-'}</td></tr>`;
